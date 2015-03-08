@@ -19,15 +19,21 @@ using System;
 
 namespace Cbonnell.DotNetExpect
 {
-    class OperationFailedException : Exception
+    /// <summary>
+    /// Represents an error that occurred when accessing a child process's console input or output.
+    /// </summary>
+    public class OperationFailedException : Exception
     {
         private const string MESSAGE_FMT = "An operation failed with the following error: {0}";
 
-        public OperationFailedException(CommandResult reason) : base(String.Format(OperationFailedException.MESSAGE_FMT, reason))
+        internal OperationFailedException(CommandResult reason) : base(String.Format(OperationFailedException.MESSAGE_FMT, reason))
         {
             this.Reason = reason;
         }
 
+        /// <summary>
+        /// Retrieves the reason for the error.
+        /// </summary>
         public CommandResult Reason
         {
             get;
