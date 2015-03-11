@@ -26,39 +26,29 @@ namespace Cbonnell.DotNetExpect
         private const int MSEC_PER_SEC = 1000;
 
         /// <summary>
-        /// The default options. See the &quot;remarks&quot; for each option property for the default value of each property.
+        /// Instantiates a new instance of <see cref="ChildProcessOptions"/>.
         /// </summary>
-        public static ChildProcessOptions Default
+        public ChildProcessOptions()
         {
-            get
-            {
-                return new ChildProcessOptions()
-                {
-                    AttachConsoleOnReadOrWrite = true,
-                    AppendNewLineOnWrite = true,
-                    AttachConsoleTimeoutMilliseconds = 10 * ChildProcessOptions.MSEC_PER_SEC,
-                    ClearConsoleOnReadMatch = true,
-                };
-            }
+            this.AttachConsole = true;
+            this.AppendNewLineOnWrite = true;
+            this.AttachConsoleTimeoutMilliseconds = 10 * ChildProcessOptions.MSEC_PER_SEC;
+            this.TimeoutMilliseconds = 60 * ChildProcessOptions.MSEC_PER_SEC;
+            this.ClearConsole = true;
         }
 
         /// <summary>
-        /// Instantiates a new instance of <see cref="ChildProcessOptions"/>.
-        /// </summary>
-        public ChildProcessOptions() { }
-
-        /// <summary>
-        /// Whether or not to attach to the child process console on each Read or Write operation. This is sometimes required, as many command line applications create their own console.
+        /// Whether or not to attach to the child process console on each input/output operation. This is sometimes required, as many command line applications create their own console.
         /// </summary>
         /// <remarks>The default value is <b>true</b>.</remarks>
-        public bool AttachConsoleOnReadOrWrite
+        public bool AttachConsole
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Whether or not to append <see cref="Environment.NewLine"/> to each specified string on Write.
+        /// Whether or not to append <see cref="Environment.NewLine"/> to each specified string on write.
         /// </summary>
         /// <remarks>The default value is <b>true</b>.</remarks>
         public bool AppendNewLineOnWrite
@@ -87,12 +77,29 @@ namespace Cbonnell.DotNetExpect
                 this.attachConsoleTimeoutMilliseconds = value;
             }
         }
+
+        private int timeoutMilliseconds;
+        /// <summary>
+        /// The amount of time to wait for matching input when calling <see cref="ChildProcess.Read"/> or <see cref="ChildProcess.Match"/> before a <see cref="TimeoutException"/> is thrown.
+        /// </summary>
+        /// <remarks>The default value is <b>60,000 milliseconds (60 seconds , or 1 minute)</b>. A negative value denotes that there is no timeout (will wait forever for matching input).</remarks>
+        public int TimeoutMilliseconds
+        {
+            get
+            {
+                return this.timeoutMilliseconds;
+            }
+            set
+            {
+                this.timeoutMilliseconds = value;
+            }
+        }
         
         /// <summary>
-        /// Whether or not to clear the console of all content after a successful Read match. This is useful so that previously read content is not returned on subsequent Reads.
+        /// Whether or not to clear the console of all content after successfully reading console content. This is useful so that previously read content is not returned on subsequent Reads.
         /// </summary>
         /// <remarks>The default value is <b>true</b>.</remarks>
-        public bool ClearConsoleOnReadMatch
+        public bool ClearConsole
         {
             get;
             set;

@@ -17,6 +17,7 @@ License along with this library. */
 
 using NUnit.Framework;
 using System;
+using System.Text.RegularExpressions;
 
 namespace Cbonnell.DotNetExpect.Test
 {
@@ -34,14 +35,14 @@ namespace Cbonnell.DotNetExpect.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorNullArguments()
         {
-            new ChildProcess(TestEnvironment.DUMMY_EXE_NAME, null);
+            new ChildProcess(TestEnvironment.DUMMY_EXE_NAME, null, new ChildProcessOptions());
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorNullWorkingDirectory()
         {
-            new ChildProcess(TestEnvironment.DUMMY_EXE_NAME, TestEnvironment.DUMMY_ARGUMENTS, null);
+            new ChildProcess(TestEnvironment.DUMMY_EXE_NAME, TestEnvironment.DUMMY_ARGUMENTS, null, new ChildProcessOptions());
         }
 
         [Test]
@@ -68,7 +69,7 @@ namespace Cbonnell.DotNetExpect.Test
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
                 childProc.Spawn();
-                childProc.Read(null);
+                childProc.Match(null);
             }
         }
 
@@ -89,9 +90,44 @@ namespace Cbonnell.DotNetExpect.Test
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
                 childProc.Spawn();
-                string content = childProc.Read(TestEnvironment.CMD_PROMPT_REGEX);
+                string content = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());
                 Console.WriteLine(content);
                 Assert.IsTrue(content.EndsWith(TestEnvironment.PROMPT_CHAR.ToString()));
+            }
+        }
+
+        [Test]
+        public void SimpleMatch()
+        {
+            using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
+            {
+                childProc.Spawn();
+                childProc.Write("dir");
+                Match m = childProc.Match(new Regex(@"Volume Serial Number is (?<VolumeSerial>[0-9A-F]{4}-[0-9A-F]{4})"));
+                Console.WriteLine("Primary volume serial number: {0}", m.Groups["VolumeSerial"].Value);
+                Assert.IsTrue(m.Success);
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(TimeoutException))]
+        public void ReadTimeout()
+        {
+            using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME, new ChildProcessOptions() { TimeoutMilliseconds = 0 }))
+            {
+                childProc.Spawn();
+                childProc.Read(Guid.NewGuid().ToString());
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(TimeoutException))]
+        public void MatchTimeout()
+        {
+            using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME, new ChildProcessOptions() { TimeoutMilliseconds = 0 }))
+            {
+                childProc.Spawn();
+                childProc.Match(new Regex(Guid.NewGuid().ToString()));
             }
         }
     }

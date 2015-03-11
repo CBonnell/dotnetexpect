@@ -24,14 +24,25 @@ namespace Cbonnell.DotNetExpect.Test
     public class ChildProcessOptionsTest
     {
         [Test]
+        public void DefaultValuesExpected()
+        {
+            ChildProcessOptions options = new ChildProcessOptions();
+            Assert.IsTrue(options.AppendNewLineOnWrite);
+            Assert.IsTrue(options.AttachConsole);
+            Assert.AreEqual(10 * 1000, options.AttachConsoleTimeoutMilliseconds);
+            Assert.AreEqual(60 * 1000, options.TimeoutMilliseconds);
+            Assert.IsTrue(options.ClearConsole);
+        }
+
+        [Test]
         public void DefaultConsoleClearsAfterMatch()
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
                 childProc.Spawn();
-                string content = childProc.Read(TestEnvironment.CMD_PROMPT_REGEX);
+                string content = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());
                 childProc.Write("echo \"hello world\"");
-                content = childProc.Read(TestEnvironment.CMD_PROMPT_REGEX);
+                content = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());
                 Assert.AreEqual(1, content.Count((c) => c.Equals(TestEnvironment.PROMPT_CHAR)));
             }
         }

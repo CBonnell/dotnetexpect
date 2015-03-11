@@ -44,6 +44,13 @@ namespace Cbonnell.DotNetExpect
         /// Creates a new instance of <see cref="ChildProcess"/>.
         /// </summary>
         /// <param name="filePath">The path to the child process. The semantics in terms of how relative paths are handled are the same as <see cref="System.Diagnostics.ProcessStartInfo.FileName"/> with <see cref="System.Diagnostics.ProcessStartInfo.UseShellExecute"/> set to <b>false</b>.</param>
+        /// <param name="options">The <see cref="ChildProcessOptions"/> to use when accessing the console input and output of the child process.</param>
+        public ChildProcess(string filePath, ChildProcessOptions options) : this(filePath, String.Empty, options) { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ChildProcess"/>.
+        /// </summary>
+        /// <param name="filePath">The path to the child process. The semantics in terms of how relative paths are handled are the same as <see cref="System.Diagnostics.ProcessStartInfo.FileName"/> with <see cref="System.Diagnostics.ProcessStartInfo.UseShellExecute"/> set to <b>false</b>.</param>
         /// <param name="arguments">The command line arguments for the child process.</param>
         public ChildProcess(string filePath, string arguments) : this(filePath, arguments, Environment.CurrentDirectory) { }
 
@@ -52,8 +59,16 @@ namespace Cbonnell.DotNetExpect
         /// </summary>
         /// <param name="filePath">The path to the child process. The semantics in terms of how relative paths are handled are the same as <see cref="System.Diagnostics.ProcessStartInfo.FileName"/> with <see cref="System.Diagnostics.ProcessStartInfo.UseShellExecute"/> set to <b>false</b>.</param>
         /// <param name="arguments">The command line arguments for the child process.</param>
+        /// /// <param name="options">The <see cref="ChildProcessOptions"/> to use when accessing the console input and output of the child process.</param>
+        public ChildProcess(string filePath, string arguments, ChildProcessOptions options) : this(filePath, arguments, Environment.CurrentDirectory, options) { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ChildProcess"/>.
+        /// </summary>
+        /// <param name="filePath">The path to the child process. The semantics in terms of how relative paths are handled are the same as <see cref="System.Diagnostics.ProcessStartInfo.FileName"/> with <see cref="System.Diagnostics.ProcessStartInfo.UseShellExecute"/> set to <b>false</b>.</param>
+        /// <param name="arguments">The command line arguments for the child process.</param>
         /// <param name="workingDirectory">The working directory for the child process.</param>
-        public ChildProcess(string filePath, string arguments, string workingDirectory) : this(filePath, arguments, workingDirectory, ChildProcessOptions.Default) { }
+        public ChildProcess(string filePath, string arguments, string workingDirectory) : this(filePath, arguments, workingDirectory, new ChildProcessOptions()) { }
 
         /// <summary>
         /// Creates a new instance of <see cref="ChildProcess"/>.
@@ -114,8 +129,8 @@ namespace Cbonnell.DotNetExpect
         /// Reads the child process's console output (screen buffer) until the content of the screen output matches the specified <see cref="Regex"/>.
         /// </summary>
         /// <param name="regex">The regular expression to match the console screen output against.</param>
-        /// <returns>The content of the child process's console output.</returns>
-        public string Read(Regex regex)
+        /// <returns>A <see cref="Match"/> that was returned after matching the console output with the specified <see cref="Regex"/>.</returns>
+        public Match Match(Regex regex)
         {
             if(regex == null)
             {
@@ -127,29 +142,27 @@ namespace Cbonnell.DotNetExpect
                 throw new InvalidOperationException();
             }
 
-            Match m = null;
-            string output = null;
-            do
+            return this.readLoopWithTimeout<Match>((s) => regex.Match(s), (m) => m.Success, this.options.TimeoutMilliseconds);
+        }
+
+        /// <summary>
+        /// Reads the child process's console output (screen buffer) until the content of the screen output contains the expected data.
+        /// </summary>
+        /// <param name="expectedData">The string for which to search.</param>
+        /// <returns>The console output.</returns>
+        public string Read(string expectedData)
+        {
+            if (expectedData == null)
             {
-                if (this.options.AttachConsoleOnReadOrWrite)
-                {
-                    this.attachConsole();
-                }
-
-                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.ReadConsole);
-                this.proxy.CommandPipeWriter.Flush();
-                this.readResponseAndThrow();
-
-                output = this.proxy.CommandPipeReader.ReadString();
-                m = regex.Match(output);
-            } while (!m.Success);
-
-            if(this.options.ClearConsoleOnReadMatch)
-            {
-                this.ClearConsole();
+                throw new ArgumentNullException("expectedData");
             }
 
-            return output;
+            if (this.proxy == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return this.readLoopWithTimeout<string>((s) => s, (s) => s.Contains(expectedData), this.options.TimeoutMilliseconds);
         }
 
         /// <summary>
@@ -173,7 +186,7 @@ namespace Cbonnell.DotNetExpect
                 data = data + Environment.NewLine;
             }
 
-            if (this.options.AttachConsoleOnReadOrWrite)
+            if (this.options.AttachConsole)
             {
                 this.attachConsole();
             }
@@ -289,6 +302,54 @@ namespace Cbonnell.DotNetExpect
                 this.proxy.Dispose();
                 this.proxy = null;
             }
+        }
+
+        private TReturn readLoopWithTimeout<TReturn>(Converter<string, TReturn> string2TypeConverter, Predicate<TReturn> isCompleteDelegate, int timeoutMilliseconds)
+        {
+            TimeSpan timeoutSpan = timeoutMilliseconds >= 0 ? TimeSpan.FromMilliseconds(timeoutMilliseconds) : default(TimeSpan);
+
+            DateTime startTime = DateTime.Now;
+            TReturn returnValue = default(TReturn);
+            while(timeoutMilliseconds < 0 || DateTime.Now < startTime + timeoutSpan)
+            {
+                string output = this.readConsoleOutput();
+                returnValue = string2TypeConverter.Invoke(output);
+                if(isCompleteDelegate.Invoke(returnValue))
+                {
+                    break;
+                }
+
+                // if we're here, then default the return value and loop back because it doesn't satisfy our condition
+                returnValue = default(TReturn);
+            }
+
+            // if we're here then we've either satisified the condition or we timed out
+            // compare the return value to the default for the return type to determine if we timed out or not
+            if(Object.Equals(returnValue, default(TReturn)))
+            {
+                throw new TimeoutException();
+            }
+
+            if(this.options.ClearConsole)
+            {
+                this.ClearConsole();
+            }
+
+            return returnValue;
+        }
+
+        private string readConsoleOutput()
+        {
+            if (this.options.AttachConsole)
+            {
+                this.attachConsole();
+            }
+
+            this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.ReadConsole);
+            this.proxy.CommandPipeWriter.Flush();
+            this.readResponseAndThrow();
+
+            return this.proxy.CommandPipeReader.ReadString();
         }
 
         private void attachConsole()

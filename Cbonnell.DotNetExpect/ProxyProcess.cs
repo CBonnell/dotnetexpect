@@ -115,7 +115,7 @@ namespace Cbonnell.DotNetExpect
 
                             if (this.childProcess != null)
                             {
-                                ConsoleInterface.AttachToConsole(this.childProcess.Id, new TimeSpan(0, 0, 0, 0, timeoutMs));
+                                ConsoleInterface.AttachToConsole(this.childProcess.Id, TimeSpan.FromMilliseconds(timeoutMs));
                                 result = CommandResult.Success;
                             }
                             else
