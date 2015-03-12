@@ -32,7 +32,7 @@ namespace Cbonnell.DotNetExpect
         private readonly string arguments;
         private readonly string workingDirectory;
         private readonly ChildProcessOptions options;
-        private ProxyProcessManager proxy = null;
+        private ProxyProcessManager proxy = new ProxyProcessManager();
 
         /// <summary>
         /// Creates a new instance of <see cref="ChildProcess"/>.
@@ -100,20 +100,7 @@ namespace Cbonnell.DotNetExpect
             this.arguments = arguments;
             this.workingDirectory = workingDirectory;
             this.options = options;
-        }
 
-        /// <summary>
-        /// Spawns the child process.
-        /// </summary>
-        /// <remarks>This method must be called before calling other methods/properties on <see cref="ChildProcess"/>.</remarks>
-        public void Spawn()
-        {
-            if(this.proxy != null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.proxy = new ProxyProcessManager();
             this.proxy.Start();
 
             this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.StartProcess);
@@ -137,10 +124,7 @@ namespace Cbonnell.DotNetExpect
                 throw new ArgumentNullException("regex");
             }
 
-            if(this.proxy == null)
-            {
-                throw new InvalidOperationException();
-            }
+            this.checkDisposedAndThrow();
 
             return this.readLoopWithTimeout<Match>((s) => regex.Match(s), (m) => m.Success, this.options.TimeoutMilliseconds);
         }
@@ -157,10 +141,7 @@ namespace Cbonnell.DotNetExpect
                 throw new ArgumentNullException("expectedData");
             }
 
-            if (this.proxy == null)
-            {
-                throw new InvalidOperationException();
-            }
+            this.checkDisposedAndThrow();
 
             return this.readLoopWithTimeout<string>((s) => s, (s) => s.Contains(expectedData), this.options.TimeoutMilliseconds);
         }
@@ -176,15 +157,9 @@ namespace Cbonnell.DotNetExpect
                 throw new ArgumentNullException("data");
             }
 
-            if (this.proxy == null)
-            {
-                throw new InvalidOperationException();
-            }
+            this.checkDisposedAndThrow();
 
-            if(this.options.AppendNewLineOnWrite)
-            {
-                data = data + Environment.NewLine;
-            }
+            data += this.options.WriteAppendString;
 
             if (this.options.AttachConsole)
             {
@@ -201,19 +176,18 @@ namespace Cbonnell.DotNetExpect
         /// Kills the child process.
         /// </summary>
         /// <returns>The exit code of the killed child process.</returns>
+        /// <remarks>After this method is called, this object is disposed no further operations can be performed on this object.</remarks>
         public int Kill()
         {
-            if(this.proxy == null)
-            {
-                throw new InvalidOperationException();
-            }
+            this.checkDisposedAndThrow();
 
             this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.KillProcess);
             this.proxy.CommandPipeWriter.Flush();
             this.readResponseAndThrow();
             int exitCode = this.proxy.CommandPipeReader.ReadInt32(); // read the exit code
-            this.proxy.Dispose();
-            this.proxy = null;
+
+            this.Dispose();
+
             return exitCode;
         }
 
@@ -222,10 +196,7 @@ namespace Cbonnell.DotNetExpect
         /// </summary>
         public void ClearConsole()
         {
-            if (this.proxy == null)
-            {
-                throw new InvalidOperationException();
-            }
+            this.checkDisposedAndThrow();
 
             this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.ClearConsole);
             this.proxy.CommandPipeWriter.Flush();
@@ -239,10 +210,7 @@ namespace Cbonnell.DotNetExpect
         {
             get
             {
-                if (this.proxy == null)
-                {
-                    throw new InvalidOperationException();
-                }
+                this.checkDisposedAndThrow();
 
                 this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetChildPid);
                 this.proxy.CommandPipeWriter.Flush();
@@ -259,10 +227,7 @@ namespace Cbonnell.DotNetExpect
         {
             get
             {
-                if (this.proxy == null)
-                {
-                    throw new InvalidOperationException();
-                }
+                this.checkDisposedAndThrow();
 
                 this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetChildExitCode);
                 this.proxy.CommandPipeWriter.Flush();
@@ -279,10 +244,7 @@ namespace Cbonnell.DotNetExpect
         {
             get
             {
-                if (this.proxy == null)
-                {
-                    throw new InvalidOperationException();
-                }
+                this.checkDisposedAndThrow();
 
                 this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetHasChildExited);
                 this.proxy.CommandPipeWriter.Flush();
@@ -301,6 +263,14 @@ namespace Cbonnell.DotNetExpect
             {
                 this.proxy.Dispose();
                 this.proxy = null;
+            }
+        }
+
+        private void checkDisposedAndThrow()
+        {
+            if(this.proxy == null)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
             }
         }
 

@@ -16,6 +16,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library. */
 
 using NUnit.Framework;
+using System;
 using System.Linq;
 
 namespace Cbonnell.DotNetExpect.Test
@@ -27,7 +28,7 @@ namespace Cbonnell.DotNetExpect.Test
         public void DefaultValuesExpected()
         {
             ChildProcessOptions options = new ChildProcessOptions();
-            Assert.IsTrue(options.AppendNewLineOnWrite);
+            Assert.AreEqual(Environment.NewLine, options.WriteAppendString);
             Assert.IsTrue(options.AttachConsole);
             Assert.AreEqual(10 * 1000, options.AttachConsoleTimeoutMilliseconds);
             Assert.AreEqual(60 * 1000, options.TimeoutMilliseconds);
@@ -39,7 +40,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Spawn();
                 string content = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());
                 childProc.Write("echo \"hello world\"");
                 content = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());

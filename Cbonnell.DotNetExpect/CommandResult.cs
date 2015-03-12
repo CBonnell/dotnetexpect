@@ -37,7 +37,7 @@ namespace Cbonnell.DotNetExpect
         /// <remarks>Generally this error is returned when the specified application does not exist.</remarks>
         CouldNotSpawnChild,
         /// <summary>
-        /// The <see cref="ChildProcess.Spawn()"/> method was already called on the current instance of <see cref="ChildProcess"/>.
+        /// The the child process was already spawned for the current instance of <see cref="ChildProcess"/>.
         /// </summary>
         ChildAlreadySpawned,
         /// <summary>
@@ -45,7 +45,7 @@ namespace Cbonnell.DotNetExpect
         /// </summary>
         ChildHasNotExited,
         /// <summary>
-        /// The <see cref="ChildProcess.Spawn()"/> method has not yet been called, so the child process does not exist.
+        /// The child process has not yet been spawned for the current instance <see cref="ChildProcess"/>.
         /// </summary>
         ChildNotSpawned,
     }

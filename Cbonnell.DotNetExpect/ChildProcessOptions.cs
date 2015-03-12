@@ -16,6 +16,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library. */
 
 using System;
+
 namespace Cbonnell.DotNetExpect
 {
     /// <summary>
@@ -31,7 +32,7 @@ namespace Cbonnell.DotNetExpect
         public ChildProcessOptions()
         {
             this.AttachConsole = true;
-            this.AppendNewLineOnWrite = true;
+            this.WriteAppendString = Environment.NewLine;
             this.AttachConsoleTimeoutMilliseconds = 10 * ChildProcessOptions.MSEC_PER_SEC;
             this.TimeoutMilliseconds = 60 * ChildProcessOptions.MSEC_PER_SEC;
             this.ClearConsole = true;
@@ -47,14 +48,25 @@ namespace Cbonnell.DotNetExpect
             set;
         }
 
+        private string writeAppendString;
         /// <summary>
-        /// Whether or not to append <see cref="Environment.NewLine"/> to each specified string on write.
+        /// The string to append to each specified string on write. This is generally useful so that one does not need to manually add newline/carriage return characters to each string to be written.
         /// </summary>
-        /// <remarks>The default value is <b>true</b>.</remarks>
-        public bool AppendNewLineOnWrite
+        /// <remarks>The default value is <b><see cref="Environment.NewLine"/></b>. If you do not want any strings to be appended to the write data, then set this value to <see cref="String.Empty"/>.</remarks>
+        public string WriteAppendString
         {
-            get;
-            set;
+            get
+            {
+                return this.writeAppendString;
+            }
+            set
+            {
+                if(value == null)
+                {
+                    throw new ArgumentNullException("value");
+                }
+                this.writeAppendString = value;
+            }
         }
 
         private int attachConsoleTimeoutMilliseconds;
@@ -82,7 +94,7 @@ namespace Cbonnell.DotNetExpect
         /// <summary>
         /// The amount of time to wait for matching input when calling <see cref="ChildProcess.Read"/> or <see cref="ChildProcess.Match"/> before a <see cref="TimeoutException"/> is thrown.
         /// </summary>
-        /// <remarks>The default value is <b>60,000 milliseconds (60 seconds , or 1 minute)</b>. A negative value denotes that there is no timeout (will wait forever for matching input).</remarks>
+        /// <remarks>The default value is <b>60,000 milliseconds (60 seconds, or 1 minute)</b>. A negative value denotes that there is no timeout (will wait forever for matching input).</remarks>
         public int TimeoutMilliseconds
         {
             get

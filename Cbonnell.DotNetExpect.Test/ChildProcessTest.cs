@@ -58,7 +58,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using(ChildProcess childProc = new ChildProcess(Guid.NewGuid().ToString() + ".exe"))
             {
-                childProc.Spawn();
             }
         }
 
@@ -68,7 +67,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Spawn();
                 childProc.Match(null);
             }
         }
@@ -79,7 +77,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Spawn();
                 childProc.Write(null);
             }
         }
@@ -89,7 +86,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Spawn();
                 string content = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());
                 Console.WriteLine(content);
                 Assert.IsTrue(content.EndsWith(TestEnvironment.PROMPT_CHAR.ToString()));
@@ -101,7 +97,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Spawn();
                 childProc.Write("dir");
                 Match m = childProc.Match(new Regex(@"Volume Serial Number is (?<VolumeSerial>[0-9A-F]{4}-[0-9A-F]{4})"));
                 Console.WriteLine("Primary volume serial number: {0}", m.Groups["VolumeSerial"].Value);
@@ -115,7 +110,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME, new ChildProcessOptions() { TimeoutMilliseconds = 0 }))
             {
-                childProc.Spawn();
                 childProc.Read(Guid.NewGuid().ToString());
             }
         }
@@ -126,7 +120,6 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME, new ChildProcessOptions() { TimeoutMilliseconds = 0 }))
             {
-                childProc.Spawn();
                 childProc.Match(new Regex(Guid.NewGuid().ToString()));
             }
         }
