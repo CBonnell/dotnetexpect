@@ -105,6 +105,16 @@ namespace Cbonnell.DotNetExpect.Test
         }
 
         [Test]
+        public void SimpleRead()
+        {
+            using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
+            {
+                string content = childProc.Read(Environment.CurrentDirectory + ">");
+                Assert.IsTrue(content.Contains(Environment.CurrentDirectory + ">"));
+            }
+        }
+
+        [Test]
         [ExpectedException(typeof(TimeoutException))]
         public void ReadTimeout()
         {
@@ -122,6 +132,15 @@ namespace Cbonnell.DotNetExpect.Test
             {
                 childProc.Match(new Regex(Guid.NewGuid().ToString()));
             }
+        }
+
+        [Test]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void ObjectDisposed()
+        {
+            ChildProcess childProc;
+            using (childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME)) { }
+            childProc.ClearConsole();
         }
     }
 }
