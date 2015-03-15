@@ -17,13 +17,21 @@ License along with this library. */
 
 using NUnit.Framework;
 using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Cbonnell.DotNetExpect.Test
 {
     [TestFixture]
     public class ChildProcessTest
     {
+        [SetUp]
+        public void SetUp()
+        {
+            TestUtilities.EnsureProxyExit();
+        }
+
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorNullFilePath()
@@ -56,7 +64,7 @@ namespace Cbonnell.DotNetExpect.Test
         [ExpectedException(typeof(OperationFailedException))]
         public void ProcessNoExist()
         {
-            using(ChildProcess childProc = new ChildProcess(Guid.NewGuid().ToString() + ".exe"))
+            using (ChildProcess childProc = new ChildProcess(Guid.NewGuid().ToString() + ".exe"))
             {
             }
         }
@@ -141,6 +149,50 @@ namespace Cbonnell.DotNetExpect.Test
             ChildProcess childProc;
             using (childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME)) { }
             childProc.ClearConsole();
+        }
+
+        [Test]
+        public void VerifyChildDeadOnDispose()
+        {
+            Process p = null;
+            try
+            {
+                using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
+                {
+                    p = Process.GetProcessById(childProc.ChildProcessId);
+                }
+                TestUtilities.WaitForProcessExitAndThrow(p);
+            }
+            finally
+            {
+                if (p != null)
+                {
+                    p.Dispose();
+                }
+            }
+        }
+
+        [Test]
+        public void VerifyProxyDeadOnDispose()
+        {
+            Process[] powerShells = null;
+
+            try
+            {
+                using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
+                {
+                    powerShells = Process.GetProcessesByName(TestEnvironment.PROXY_PROCESS_NAME);
+                    Assert.AreEqual(1, powerShells.Length);                    
+                }
+                TestUtilities.WaitForProcessExitAndThrow(powerShells[0]);
+            }
+            finally
+            {
+                if(powerShells != null)
+                {
+                    Array.ForEach(powerShells, (p) => p.Dispose());
+                }
+            }
         }
     }
 }

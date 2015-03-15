@@ -25,6 +25,8 @@ namespace Cbonnell.DotNetExpect.Test
         public const string DUMMY_EXE_NAME = "myprocess.exe";
         public const string DUMMY_ARGUMENTS = "foo hoge";
 
+        public const string PROXY_PROCESS_NAME = "powershell";
+
         public const char PROMPT_CHAR = '>';
 
         public static readonly Regex CMD_PROMPT_REGEX = new Regex(TestEnvironment.PROMPT_CHAR.ToString());

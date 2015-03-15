@@ -193,7 +193,7 @@ namespace Cbonnell.DotNetExpect
                     this.commandWriter.Flush();
                 }
             }
-            catch(EndOfStreamException) // handle the case where the parent process dies
+            finally // ensure that the child process is killed if we exit
             {
                 if(this.childProcess != null)
                 {

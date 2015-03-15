@@ -24,6 +24,12 @@ namespace Cbonnell.DotNetExpect.Test
     [TestFixture]
     public class ChildProcessOptionsTest
     {
+        [SetUp]
+        public void SetUp()
+        {
+            TestUtilities.EnsureProxyExit();
+        }
+
         [Test]
         public void DefaultValuesExpected()
         {

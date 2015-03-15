@@ -101,15 +101,22 @@ namespace Cbonnell.DotNetExpect
             this.workingDirectory = workingDirectory;
             this.options = options;
 
-            this.proxy.Start();
+            try
+            {
+                this.proxy.Start();
+                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.StartProcess);
+                this.proxy.CommandPipeWriter.Write(this.filePath);
+                this.proxy.CommandPipeWriter.Write(this.arguments);
+                this.proxy.CommandPipeWriter.Write(this.workingDirectory);
+                this.proxy.CommandPipeWriter.Flush();
 
-            this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.StartProcess);
-            this.proxy.CommandPipeWriter.Write(this.filePath);
-            this.proxy.CommandPipeWriter.Write(this.arguments);
-            this.proxy.CommandPipeWriter.Write(this.workingDirectory);
-            this.proxy.CommandPipeWriter.Flush();
-
-            this.readResponseAndThrow();
+                this.readResponseAndThrow();
+            }
+            catch(Exception) // if for any reason there was error, ensure that the proxy is cleaned up
+            {
+                this.Dispose();
+                throw;
+            }
         }
 
         /// <summary>

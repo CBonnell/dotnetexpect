@@ -28,7 +28,7 @@ namespace Cbonnell.DotNetExpect
     internal class ProxyProcessManager : IDisposable
     {
         private const string PIPE_NAME_FMT = "Cbonnell.DotNetExpect.{0}";
-        private const string POWERSHELL_COMMAND_LINE = "PowerShell.exe -Command \"$asm = [System.Reflection.Assembly]::LoadFile('{0}'); $proxyType = $asm.GetType('Cbonnell.DotNetExpect.ProxyProcess'); $proxy = [System.Activator]::CreateInstance($proxyType, @('{1}')); $proxy.Run() | Out-Null;\"";
+        private const string POWERSHELL_COMMAND_LINE = "powershell.exe -Command \"$asm = [System.Reflection.Assembly]::LoadFile('{0}'); $proxyType = $asm.GetType('Cbonnell.DotNetExpect.ProxyProcess'); $proxy = [System.Activator]::CreateInstance($proxyType, @('{1}')); $proxy.Run() | Out-Null;\"";
 
         private readonly NamedPipeServerStream commandPipe;
         private readonly BinaryReader commandPipeReader;
