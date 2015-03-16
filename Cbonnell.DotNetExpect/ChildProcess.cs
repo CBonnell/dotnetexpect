@@ -31,7 +31,6 @@ namespace Cbonnell.DotNetExpect
         private readonly string filePath;
         private readonly string arguments;
         private readonly string workingDirectory;
-        private readonly ChildProcessOptions options;
         private ProxyProcessManager proxy = new ProxyProcessManager();
 
         /// <summary>
@@ -99,7 +98,7 @@ namespace Cbonnell.DotNetExpect
             this.filePath = filePath;
             this.arguments = arguments;
             this.workingDirectory = workingDirectory;
-            this.options = options;
+            this.Options = options;
 
             try
             {
@@ -133,7 +132,7 @@ namespace Cbonnell.DotNetExpect
 
             this.checkDisposedAndThrow();
 
-            return this.readLoopWithTimeout<Match>((s) => regex.Match(s), (m) => m.Success, this.options.TimeoutMilliseconds);
+            return this.readLoopWithTimeout<Match>((s) => regex.Match(s), (m) => m.Success, this.Options.TimeoutMilliseconds);
         }
 
         /// <summary>
@@ -150,7 +149,7 @@ namespace Cbonnell.DotNetExpect
 
             this.checkDisposedAndThrow();
 
-            return this.readLoopWithTimeout<string>((s) => s, (s) => s.Contains(expectedData), this.options.TimeoutMilliseconds);
+            return this.readLoopWithTimeout<string>((s) => s, (s) => s.Contains(expectedData), this.Options.TimeoutMilliseconds);
         }
 
         /// <summary>
@@ -166,9 +165,9 @@ namespace Cbonnell.DotNetExpect
 
             this.checkDisposedAndThrow();
 
-            data += this.options.WriteAppendString;
+            data += this.Options.WriteAppendString;
 
-            if (this.options.AttachConsole)
+            if (this.Options.AttachConsole)
             {
                 this.attachConsole();
             }
@@ -262,6 +261,15 @@ namespace Cbonnell.DotNetExpect
         }
 
         /// <summary>
+        /// Retrieves the <see cref="ChildProcessOptions"/> used by the current instance of <see cref="ChildProcess"/>.
+        /// </summary>
+        public ChildProcessOptions Options
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Disposes the current instance of <see cref="ChildProcess"/>.
         /// </summary>
         public void Dispose()
@@ -307,7 +315,7 @@ namespace Cbonnell.DotNetExpect
                 throw new TimeoutException();
             }
 
-            if(this.options.ClearConsole)
+            if(this.Options.ClearConsole)
             {
                 this.ClearConsole();
             }
@@ -317,7 +325,7 @@ namespace Cbonnell.DotNetExpect
 
         private string readConsoleOutput()
         {
-            if (this.options.AttachConsole)
+            if (this.Options.AttachConsole)
             {
                 this.attachConsole();
             }
@@ -332,7 +340,7 @@ namespace Cbonnell.DotNetExpect
         private void attachConsole()
         {
             this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.AttachConsole);
-            this.proxy.CommandPipeWriter.Write(this.options.AttachConsoleTimeoutMilliseconds);
+            this.proxy.CommandPipeWriter.Write(this.Options.AttachConsoleTimeoutMilliseconds);
             this.proxy.CommandPipeWriter.Flush();
             this.readResponseAndThrow();
         }

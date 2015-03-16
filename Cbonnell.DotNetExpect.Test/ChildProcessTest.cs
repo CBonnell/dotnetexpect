@@ -64,9 +64,7 @@ namespace Cbonnell.DotNetExpect.Test
         [ExpectedException(typeof(OperationFailedException))]
         public void ProcessNoExist()
         {
-            using (ChildProcess childProc = new ChildProcess(Guid.NewGuid().ToString() + ".exe"))
-            {
-            }
+            using (ChildProcess childProc = new ChildProcess(Guid.NewGuid().ToString() + ".exe")) { }
         }
 
         [Test]
@@ -176,15 +174,17 @@ namespace Cbonnell.DotNetExpect.Test
         public void VerifyProxyDeadOnDispose()
         {
             Process[] powerShells = null;
+            Process proxyProcess = null;
 
             try
             {
                 using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
                 {
                     powerShells = Process.GetProcessesByName(TestEnvironment.PROXY_PROCESS_NAME);
-                    Assert.AreEqual(1, powerShells.Length);                    
+                    proxyProcess = Array.Find(powerShells, (p) => TestUtilities.IsProxyProcess(p));
+                    Assert.AreEqual(1, Array.FindAll(powerShells, (p) => TestUtilities.IsProxyProcess(p)).Length);                    
                 }
-                TestUtilities.WaitForProcessExitAndThrow(powerShells[0]);
+                TestUtilities.WaitForProcessExitAndThrow(proxyProcess);
             }
             finally
             {
