@@ -20,19 +20,19 @@ using(ChildProcess childProc = new ChildProcess("telnet.exe", "192.168.1.1"))
 	childProc.Read("login:");
 
 	// Write the user name with which to login to the console input
-	childProc.Write("root");
+	childProc.WriteLine("root");
 
 	// Wait for the password prompt to appear
 	childProc.Read("Password:");
 
 	// Write the password
-	childProc.Write("MySecretPassword");
+	childProc.WriteLine("MySecretPassword");
 
 	// Wait for the root shell prompt to appear
 	childProc.Read("#");
 
 	// Issue the "ls" command to output the directory contents
-	childProc.Write("ls");
+	childProc.WriteLine("ls");
 
 	// Wait until the root shell prompt appears and return the directory contents
 	string dirContents = childProc.Read("#");

@@ -32,7 +32,7 @@ namespace Cbonnell.DotNetExpect
         public ChildProcessOptions()
         {
             this.AttachConsole = true;
-            this.WriteAppendString = Environment.NewLine;
+            this.NewLine = Environment.NewLine;
             this.AttachConsoleTimeoutMilliseconds = 10 * ChildProcessOptions.MSEC_PER_SEC;
             this.TimeoutMilliseconds = 60 * ChildProcessOptions.MSEC_PER_SEC;
             this.ClearConsole = true;
@@ -48,16 +48,16 @@ namespace Cbonnell.DotNetExpect
             set;
         }
 
-        private string writeAppendString;
+        private string newLine;
         /// <summary>
-        /// The string to append to each specified string on write. This is generally useful so that one does not need to manually add newline/carriage return characters to each string to be written.
+        /// The string to append to each specified string when calling <see cref="ChildProcess.WriteLine"/>. This is generally useful so that one does not need to manually add newline/carriage return characters to each string to be written.
         /// </summary>
-        /// <remarks>The default value is <b><see cref="Environment.NewLine"/></b>. If you do not want any strings to be appended to the write data, then set this value to <see cref="String.Empty"/>.</remarks>
-        public string WriteAppendString
+        /// <remarks>The default value is <b><see cref="Environment.NewLine"/></b>.</remarks>
+        public string NewLine
         {
             get
             {
-                return this.writeAppendString;
+                return this.newLine;
             }
             set
             {
@@ -65,7 +65,7 @@ namespace Cbonnell.DotNetExpect
                 {
                     throw new ArgumentNullException("value");
                 }
-                this.writeAppendString = value;
+                this.newLine = value;
             }
         }
 

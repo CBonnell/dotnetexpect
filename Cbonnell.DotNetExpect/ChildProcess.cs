@@ -58,7 +58,7 @@ namespace Cbonnell.DotNetExpect
         /// </summary>
         /// <param name="filePath">The path to the child process. The semantics in terms of how relative paths are handled are the same as <see cref="System.Diagnostics.ProcessStartInfo.FileName"/> with <see cref="System.Diagnostics.ProcessStartInfo.UseShellExecute"/> set to <b>false</b>.</param>
         /// <param name="arguments">The command line arguments for the child process.</param>
-        /// /// <param name="options">The <see cref="ChildProcessOptions"/> to use when accessing the console input and output of the child process.</param>
+        /// <param name="options">The <see cref="ChildProcessOptions"/> to use when accessing the console input and output of the child process.</param>
         public ChildProcess(string filePath, string arguments, ChildProcessOptions options) : this(filePath, arguments, Environment.CurrentDirectory, options) { }
 
         /// <summary>
@@ -165,8 +165,6 @@ namespace Cbonnell.DotNetExpect
 
             this.checkDisposedAndThrow();
 
-            data += this.Options.WriteAppendString;
-
             if (this.Options.AttachConsole)
             {
                 this.attachConsole();
@@ -176,6 +174,22 @@ namespace Cbonnell.DotNetExpect
             this.proxy.CommandPipeWriter.Write(data);
             this.proxy.CommandPipeWriter.Flush();
             this.readResponseAndThrow();
+        }
+
+        /// <summary>
+        /// Writes the specified string to the child process's console, first appending the value of <see cref="ChildProcessOptions.NewLine"/> to the string.
+        /// </summary>
+        /// <param name="data">The string data to write to the child process's console.</param>
+        public void WriteLine(string data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            data += this.Options.NewLine;
+
+            this.Write(data);
         }
 
         /// <summary>

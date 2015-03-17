@@ -83,7 +83,7 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Write(null);
+                childProc.WriteLine(null);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Cbonnell.DotNetExpect.Test
         {
             using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
             {
-                childProc.Write("dir");
+                childProc.WriteLine("dir");
                 Match m = childProc.Match(new Regex(@"Volume Serial Number is (?<VolumeSerial>[0-9A-F]{4}-[0-9A-F]{4})"));
                 Console.WriteLine("Primary volume serial number: {0}", m.Groups["VolumeSerial"].Value);
                 Assert.IsTrue(m.Success);
