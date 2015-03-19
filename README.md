@@ -42,7 +42,7 @@ using(ChildProcess childProc = new ChildProcess("telnet.exe", "192.168.1.1"))
 }
 ```
 
-Many other properties and methods are exposed on the `ChildProcess` class, including regular expression output matching and process management (such as terminating a child process and retrieving its exit code, etc.). Documentation is provided for each public member of the library and the library was designed to leverage Visual Studio's Intellisense functionality for discoverability and ease of use.
+Many other properties and methods are exposed on the `ChildProcess` class, including regular expression output matching and process management (such as terminating a child process and retrieving its exit code, etc.). Documentation is provided for each public member of the library and the library was designed to leverage Visual Studio's IntelliSense functionality for discoverability and ease of use.
 
 ### How do I build DotNetExpect?
 DotNetExpect is Visual Studio 2013 project, so it is possible to build the project by merely opening up the solution (.sln) file for the library and building it or invoking MSBuild from the command line. Binaries may be provided at some point depending on demand.
@@ -50,8 +50,14 @@ DotNetExpect is Visual Studio 2013 project, so it is possible to build the proje
 ### What are the system requirements for using DotNetExpect?
 DotNetExpect is written against .NET framework 3.5, so that version of the framework or higher must be installed. DotNetExpect uses PowerShell as a proxy process (see the section "How does DotNetExpect work?" below for details), so PowerShell must be installed and on the system PATH. Any version of PowerShell should work.
 
+### What is the license for DotNetExpect?
+DotNetExpect is licensed under the LGPL version 3.0.
+
 ### Are there tests available?
 A small suite of unit and integration tests is included in the Visual Studio solution. These tests are written against NUnit 2.6.4, so you will need to have NUnit installed to build and run these tests.
+
+### How do I report bugs or request enhancements?
+Please [create an issue](https://github.com/CBonnell/dotnetexpect/issues).
 
 ### How does DotNetExpect work?
 When an instance of `ChildProcess` is created, a randomly-named named pipe is created and a "proxy process" is launched. The proxy process that is created is PowerShell, which then loads the DotNetExpect assembly and invokes the code in the DotNetExpect library that runs the proxy process server. The proxy process server connects to the named pipe and services commands sent from the library. Whenever a method or property is called on `ChildProcess`, that request is sent via the named pipe to the proxy process, which then services the request.
