@@ -78,19 +78,19 @@ namespace Cbonnell.DotNetExpect
         /// <param name="options">The <see cref="ChildProcessOptions"/> to use when accessing the console input and output of the child process.</param>
         public ChildProcess(string filePath, string arguments, string workingDirectory, ChildProcessOptions options)
         {
-            if(filePath == null)
+            if (filePath == null)
             {
                 throw new ArgumentNullException("filePath");
             }
-            if(arguments == null)
+            if (arguments == null)
             {
                 throw new ArgumentNullException("arguments");
             }
-            if(workingDirectory == null)
+            if (workingDirectory == null)
             {
                 throw new ArgumentNullException("workingDirectory");
             }
-            if(options == null)
+            if (options == null)
             {
                 throw new ArgumentNullException("options");
             }
@@ -111,7 +111,7 @@ namespace Cbonnell.DotNetExpect
 
                 this.readResponseAndThrow();
             }
-            catch(Exception) // if for any reason there was error, ensure that the proxy is cleaned up
+            catch (Exception) // if for any reason there was error, ensure that the proxy is cleaned up
             {
                 this.Dispose();
                 throw;
@@ -125,7 +125,7 @@ namespace Cbonnell.DotNetExpect
         /// <returns>A <see cref="Match"/> that was returned after matching the console output with the specified <see cref="Regex"/>.</returns>
         public Match Match(Regex regex)
         {
-            if(regex == null)
+            if (regex == null)
             {
                 throw new ArgumentNullException("regex");
             }
@@ -158,7 +158,7 @@ namespace Cbonnell.DotNetExpect
         /// <param name="data">The string data to write to the child process's console.</param>
         public void Write(string data)
         {
-            if(data == null)
+            if (data == null)
             {
                 throw new ArgumentNullException("data");
             }
@@ -288,7 +288,7 @@ namespace Cbonnell.DotNetExpect
         /// </summary>
         public void Dispose()
         {
-            if(this.proxy != null)
+            if (this.proxy != null)
             {
                 this.proxy.Dispose();
                 this.proxy = null;
@@ -297,7 +297,7 @@ namespace Cbonnell.DotNetExpect
 
         private void checkDisposedAndThrow()
         {
-            if(this.proxy == null)
+            if (this.proxy == null)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
@@ -309,11 +309,11 @@ namespace Cbonnell.DotNetExpect
 
             DateTime startTime = DateTime.Now;
             TReturn returnValue = default(TReturn);
-            while(timeoutMilliseconds < 0 || DateTime.Now < startTime + timeoutSpan)
+            while (timeoutMilliseconds < 0 || DateTime.Now < startTime + timeoutSpan)
             {
                 string output = this.readConsoleOutput();
                 returnValue = string2TypeConverter.Invoke(output);
-                if(isCompleteDelegate.Invoke(returnValue))
+                if (isCompleteDelegate.Invoke(returnValue))
                 {
                     break;
                 }
@@ -324,12 +324,12 @@ namespace Cbonnell.DotNetExpect
 
             // if we're here then we've either satisified the condition or we timed out
             // compare the return value to the default for the return type to determine if we timed out or not
-            if(Object.Equals(returnValue, default(TReturn)))
+            if (Object.Equals(returnValue, default(TReturn)))
             {
                 throw new TimeoutException();
             }
 
-            if(this.Options.ClearConsole)
+            if (this.Options.ClearConsole)
             {
                 this.ClearConsole();
             }

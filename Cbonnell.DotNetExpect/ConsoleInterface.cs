@@ -34,10 +34,10 @@ namespace Cbonnell.DotNetExpect
             char[,] output = ConsoleInterface.ReadConsoleRaw();
             StringBuilder buffer = new StringBuilder();
 
-            for(int y = 0; y < output.GetLength(1); y++)
+            for (int y = 0; y < output.GetLength(1); y++)
             {
                 char[] lineChars = new char[output.GetLength(0)];
-                for(int i = 0; i < lineChars.Length; i++)
+                for (int i = 0; i < lineChars.Length; i++)
                 {
                     lineChars[i] = output[i, y];
                 }
@@ -56,15 +56,15 @@ namespace Cbonnell.DotNetExpect
             readRegion.Bottom = (short)(screenBufferInfo.dwCursorPosition.Y + 1); // read all lines from the top of the screen buffer to the current cursor position (inclusive)
 
             NativeInterface.CHAR_INFO[] charInfos = new NativeInterface.CHAR_INFO[screenBufferInfo.dwSize.X * screenBufferInfo.dwSize.Y];
-            using(SafeHandle hConsoleOutput = ConsoleInterface.getConsoleOutputHandle())
+            using (SafeHandle hConsoleOutput = ConsoleInterface.getConsoleOutputHandle())
             {
                 ConsoleInterface.callWin32Func(() => NativeInterface.ReadConsoleOutput(hConsoleOutput, charInfos, screenBufferInfo.dwSize, default(NativeInterface.COORD), ref readRegion));
             }
 
             char[,] output = new char[screenBufferInfo.dwSize.X, readRegion.Bottom];
-            for(int y = 0; y < readRegion.Bottom; y++)
+            for (int y = 0; y < readRegion.Bottom; y++)
             {
-                for(int x = 0; x < screenBufferInfo.dwSize.X; x++)
+                for (int x = 0; x < screenBufferInfo.dwSize.X; x++)
                 {
                     output[x, y] = charInfos[y * screenBufferInfo.dwSize.X + x].UnicodeChar;
                 }
@@ -75,11 +75,11 @@ namespace Cbonnell.DotNetExpect
 
         public static void WriteConsole(string data)
         {
-            using(SafeHandle hConsoleInput = ConsoleInterface.getConsoleInputHandle())
+            using (SafeHandle hConsoleInput = ConsoleInterface.getConsoleInputHandle())
             {
                 // we need 2x the number of characters because we need to simulate key press and key release events for each character
                 NativeInterface.INPUT_RECORD[] inputRecords = new NativeInterface.INPUT_RECORD[data.Length * 2];
-                for(int i = 0; i < data.Length; i++)
+                for (int i = 0; i < data.Length; i++)
                 {
                     NativeInterface.KEY_EVENT_RECORD keyPressEvent = default(NativeInterface.KEY_EVENT_RECORD);
                     keyPressEvent.bKeyDown = true;
@@ -106,7 +106,7 @@ namespace Cbonnell.DotNetExpect
             DateTime startTime = DateTime.Now;
             do
             {
-                if(NativeInterface.AttachConsole(processId))
+                if (NativeInterface.AttachConsole(processId))
                 {
                     return;
                 }
@@ -116,7 +116,7 @@ namespace Cbonnell.DotNetExpect
 
         public static void ClearConsole()
         {
-            using(SafeHandle hConsoleOutput = ConsoleInterface.getConsoleOutputHandle())
+            using (SafeHandle hConsoleOutput = ConsoleInterface.getConsoleOutputHandle())
             {
                 // get dimensions of the screen buffer
                 NativeInterface.CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo = ConsoleInterface.getScreenBufferInfo();
@@ -176,7 +176,8 @@ namespace Cbonnell.DotNetExpect
 
         private class ConsoleHandle : SafeHandleMinusOneIsInvalid
         {
-            public ConsoleHandle(IntPtr hConsole, bool ownsHandle) : base(ownsHandle)
+            public ConsoleHandle(IntPtr hConsole, bool ownsHandle)
+                : base(ownsHandle)
             {
                 this.SetHandle(hConsole);
             }

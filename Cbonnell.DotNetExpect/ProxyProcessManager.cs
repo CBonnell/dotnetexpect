@@ -71,7 +71,7 @@ namespace Cbonnell.DotNetExpect
             string commandLine = String.Format(ProxyProcessManager.POWERSHELL_COMMAND_LINE, Assembly.GetExecutingAssembly().Location, this.commandPipeName);
 
             NativeMethods.PROCESS_INFORMATION procInfo;
-            if(!NativeMethods.CreateProcess(null, commandLine, IntPtr.Zero, IntPtr.Zero, false, NativeMethods.CREATE_NEW_CONSOLE, IntPtr.Zero, null, ref startInfo, out procInfo))
+            if (!NativeMethods.CreateProcess(null, commandLine, IntPtr.Zero, IntPtr.Zero, false, NativeMethods.CREATE_NEW_CONSOLE, IntPtr.Zero, null, ref startInfo, out procInfo))
             {
                 throw new Win32Exception();
             }
@@ -85,7 +85,7 @@ namespace Cbonnell.DotNetExpect
         public void Dispose()
         {
             this.commandPipe.Dispose();
-            if(this.proxyProcess != null)
+            if (this.proxyProcess != null)
             {
                 this.proxyProcess.Dispose();
             }

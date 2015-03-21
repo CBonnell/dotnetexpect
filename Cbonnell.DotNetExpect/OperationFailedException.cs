@@ -26,7 +26,8 @@ namespace Cbonnell.DotNetExpect
     {
         private const string MESSAGE_FMT = "An operation failed with the following error: {0}";
 
-        internal OperationFailedException(CommandResult reason) : base(String.Format(OperationFailedException.MESSAGE_FMT, reason))
+        internal OperationFailedException(CommandResult reason)
+            : base(String.Format(OperationFailedException.MESSAGE_FMT, reason))
         {
             this.Reason = reason;
         }

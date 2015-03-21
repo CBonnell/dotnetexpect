@@ -61,7 +61,7 @@ namespace Cbonnell.DotNetExpect
             }
             set
             {
-                if(value == null)
+                if (value == null)
                 {
                     throw new ArgumentNullException("value");
                 }
@@ -82,7 +82,7 @@ namespace Cbonnell.DotNetExpect
             }
             set
             {
-                if(value < 0)
+                if (value < 0)
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
@@ -106,7 +106,7 @@ namespace Cbonnell.DotNetExpect
                 this.timeoutMilliseconds = value;
             }
         }
-        
+
         /// <summary>
         /// Whether or not to clear the console of all content after successfully reading console content. This is useful so that previously read content is not returned on subsequent Reads.
         /// </summary>

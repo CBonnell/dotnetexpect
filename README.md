@@ -48,7 +48,7 @@ Many other properties and methods are exposed on the `ChildProcess` class, inclu
 DotNetExpect is Visual Studio 2013 project, so it is possible to build the project by merely opening up the solution (.sln) file for the library and building it or invoking MSBuild from the command line. Binaries may be provided at some point depending on demand.
 
 ### What are the system requirements for using DotNetExpect?
-DotNetExpect is written against .NET framework 3.5, so that version of the framework or higher must be installed. DotNetExpect uses PowerShell as a proxy process (see the section "How does DotNetExpect work?" below for details), so PowerShell must be installed and on the system PATH. Any version of PowerShell should work.
+DotNetExpect is written against .NET framework 3.5 (client profile), so that version of the framework or higher must be installed. DotNetExpect uses PowerShell as a proxy process (see the section "How does DotNetExpect work?" below for details), so PowerShell must be installed and on the system PATH. Any version of PowerShell should work.
 
 ### What is the license for DotNetExpect?
 DotNetExpect is licensed under the LGPL version 3.0.

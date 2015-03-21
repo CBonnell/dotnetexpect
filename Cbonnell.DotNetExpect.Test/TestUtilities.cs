@@ -16,9 +16,9 @@ namespace Cbonnell.DotNetExpect.Test
             Process[] powerShells = Process.GetProcessesByName(TestEnvironment.PROXY_PROCESS_NAME);
             try
             {
-                foreach(Process p in powerShells)
+                foreach (Process p in powerShells)
                 {
-                    if(TestUtilities.IsProxyProcess(p))
+                    if (TestUtilities.IsProxyProcess(p))
                     {
                         TestUtilities.WaitForProcessExitAndThrow(p);
                     }
@@ -37,7 +37,7 @@ namespace Cbonnell.DotNetExpect.Test
 
             try
             {
-                foreach(ProcessModule pm in procModules)
+                foreach (ProcessModule pm in procModules)
                 {
                     if (pm.ModuleName.Equals("Cbonnell.DotNetExpect.dll", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -48,9 +48,9 @@ namespace Cbonnell.DotNetExpect.Test
             }
             finally
             {
-                if(procModules != null)
+                if (procModules != null)
                 {
-                    foreach(ProcessModule pm in procModules)
+                    foreach (ProcessModule pm in procModules)
                     {
                         pm.Dispose();
                     }

@@ -78,7 +78,7 @@ namespace Cbonnell.DotNetExpect
                                     this.childProcess.Start();
                                     result = CommandResult.Success;
                                 }
-                                catch(Exception)
+                                catch (Exception)
                                 {
                                     result = CommandResult.CouldNotSpawnChild;
                                     this.childProcess.Dispose();
@@ -139,7 +139,7 @@ namespace Cbonnell.DotNetExpect
                             result = CommandResult.Success;
                             break;
                         case ProxyCommand.GetHasChildExited:
-                            if(this.childProcess != null)
+                            if (this.childProcess != null)
                             {
                                 this.commandWriter.Write((byte)CommandResult.Success);
                                 this.commandWriter.Write(this.childProcess.HasExited);
@@ -151,7 +151,7 @@ namespace Cbonnell.DotNetExpect
                             }
                             break;
                         case ProxyCommand.GetChildPid:
-                            if(this.childProcess != null)
+                            if (this.childProcess != null)
                             {
                                 this.commandWriter.Write((byte)CommandResult.Success);
                                 this.commandWriter.Write(this.childProcess.Id);
@@ -163,9 +163,9 @@ namespace Cbonnell.DotNetExpect
                             }
                             break;
                         case ProxyCommand.GetChildExitCode:
-                            if(this.childProcess != null)
+                            if (this.childProcess != null)
                             {
-                                if(this.childProcess.HasExited)
+                                if (this.childProcess.HasExited)
                                 {
                                     this.commandWriter.Write((byte)CommandResult.Success);
                                     this.commandWriter.Write(this.childProcess.ExitCode);
@@ -195,7 +195,7 @@ namespace Cbonnell.DotNetExpect
             }
             finally // ensure that the child process is killed if we exit
             {
-                if(this.childProcess != null)
+                if (this.childProcess != null)
                 {
                     this.childProcess.Kill();
                 }

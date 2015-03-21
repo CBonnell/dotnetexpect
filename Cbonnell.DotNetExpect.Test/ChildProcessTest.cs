@@ -182,13 +182,13 @@ namespace Cbonnell.DotNetExpect.Test
                 {
                     powerShells = Process.GetProcessesByName(TestEnvironment.PROXY_PROCESS_NAME);
                     proxyProcess = Array.Find(powerShells, (p) => TestUtilities.IsProxyProcess(p));
-                    Assert.AreEqual(1, Array.FindAll(powerShells, (p) => TestUtilities.IsProxyProcess(p)).Length);                    
+                    Assert.AreEqual(1, Array.FindAll(powerShells, (p) => TestUtilities.IsProxyProcess(p)).Length);
                 }
                 TestUtilities.WaitForProcessExitAndThrow(proxyProcess);
             }
             finally
             {
-                if(powerShells != null)
+                if (powerShells != null)
                 {
                     Array.ForEach(powerShells, (p) => p.Dispose());
                 }
