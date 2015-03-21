@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Cbonnell.DotNetExpect")]
-[assembly: AssemblyDescription("A .NET library for accessing console I/O of child processes.")]
+[assembly: AssemblyDescription("An Expect-inspired .NET library for accessing console I/O of processes.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Cbonnell")]
 [assembly: AssemblyProduct("Cbonnell.DotNetExpect")]
