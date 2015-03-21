@@ -44,8 +44,11 @@ using(ChildProcess childProc = new ChildProcess("telnet.exe", "192.168.1.1"))
 
 Many other properties and methods are exposed on the `ChildProcess` class, including regular expression output matching and process management (such as terminating a child process and retrieving its exit code, etc.). Documentation is provided for each public member of the library and the library was designed to leverage Visual Studio's IntelliSense functionality for discoverability and ease of use.
 
+### How do I obtain DotNetExpect?
+DotNetExpect is available as a [NuGet package](https://www.nuget.org/packages/Cbonnell.DotNetExpect/). Alternatively, the library can be built from source.
+
 ### How do I build DotNetExpect?
-DotNetExpect is Visual Studio 2013 project, so it is possible to build the project by merely opening up the solution (.sln) file for the library and building it or invoking MSBuild from the command line. Binaries may be provided at some point depending on demand.
+DotNetExpect is Visual Studio 2013 project, so it is possible to build the project by merely opening up the solution (.sln) file for the library and building it or invoking MSBuild from the command line.
 
 ### What are the system requirements for using DotNetExpect?
 DotNetExpect is written against .NET framework 3.5 (client profile), so that version of the framework or higher must be installed. DotNetExpect uses PowerShell as a proxy process (see the section "How does DotNetExpect work?" below for details), so PowerShell must be installed and on the system PATH. Any version of PowerShell should work.
