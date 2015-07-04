@@ -14,7 +14,7 @@ Here is a short example showing how the Windows Telnet client application can be
 ```csharp
 // Create a new instance of ChildProcess. This will spawn telnet.exe and connect its console to the library.
 // ChildProcess implements IDisposable, so generally you will want to instantiate this class in a using statement.
-using(ChildProcess childProc = new ChildProcess("telnet.exe", "192.168.1.1"))
+using (ChildProcess childProc = new ChildProcess("telnet.exe", "192.168.1.1"))
 {
 	// Wait for the login prompt to appear
 	childProc.Read("login:");
@@ -60,7 +60,7 @@ DotNetExpect is licensed under the LGPL version 3.0.
 A small suite of unit and integration tests is included in the Visual Studio solution. These tests are written against NUnit 2.6.4, so you will need to have NUnit installed to build and run these tests.
 
 ### Are there any limitations of DotNetExpect?
-The chief limitation of DotNetExpect is that the output of console applications may be lost if huge amounts of data are being written to the console. This is due to how DotNetExpect interacts with console applications to capture thier output. The contents of the screen buffer are constantly being captured by the library, but there may be instances where some output is lost due to the output "scrolling out" of the buffer before it can be captured.
+The chief limitation of DotNetExpect is that the output of console applications may be lost if huge amounts of data are being written to the console. This is due to how DotNetExpect interacts with console applications to capture thier output. The contents of the console application's screen buffer are constantly being captured by the library, but there may be instances where some output is lost due to the output "scrolling out" of the buffer before it can be captured.
 
 A second limitation is that "console-like" applications, such as PuTTY, cannot be manipulated using this library. This is due to PuTTY (and some other applications) actually not being a console application, but rather a Windows graphical application that happens to look like a console application. Therefore, the Console API functions that DotNetExpect uses have no effect on these types of applications.
 

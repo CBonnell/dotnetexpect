@@ -28,9 +28,6 @@ namespace Cbonnell.DotNetExpect
     /// </summary>
     public class ChildProcess : IDisposable
     {
-        private readonly string filePath;
-        private readonly string arguments;
-        private readonly string workingDirectory;
         private ProxyProcessManager proxy = new ProxyProcessManager();
 
         /// <summary>
@@ -95,23 +92,58 @@ namespace Cbonnell.DotNetExpect
                 throw new ArgumentNullException("options");
             }
 
-            this.filePath = filePath;
-            this.arguments = arguments;
-            this.workingDirectory = workingDirectory;
             this.Options = options;
 
             try
             {
                 this.proxy.Start();
                 this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.StartProcess);
-                this.proxy.CommandPipeWriter.Write(this.filePath);
-                this.proxy.CommandPipeWriter.Write(this.arguments);
-                this.proxy.CommandPipeWriter.Write(this.workingDirectory);
+                this.proxy.CommandPipeWriter.Write(filePath);
+                this.proxy.CommandPipeWriter.Write(arguments);
+                this.proxy.CommandPipeWriter.Write(workingDirectory);
                 this.proxy.CommandPipeWriter.Flush();
 
                 this.readResponseAndThrow();
             }
-            catch (Exception) // if for any reason there was error, ensure that the proxy is cleaned up
+            catch (Exception)
+            {
+                this.Dispose();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ChildProcess"/>.
+        /// </summary>
+        /// <param name="pid">The process ID of the console process.</param>
+        /// <remarks>This constructor is used to manipulate console I/O for a process that is already running.</remarks>
+        public ChildProcess(int pid) : this(pid, new ChildProcessOptions()) { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ChildProcess"/>.
+        /// </summary>
+        /// <param name="pid">The process ID of the console process.</param>
+        /// <param name="options">The <see cref="ChildProcessOptions"/> to use when accessing the console input and output of the child process.</param>
+        /// <remarks>This constructor is used to manipulate console I/O for a process that is already running.</remarks>
+        public ChildProcess(int pid, ChildProcessOptions options)
+        {
+            if (options == null)
+            {
+                throw new ArgumentNullException("options");
+            }
+
+            this.Options = options;
+
+            try
+            {
+                this.proxy.Start();
+                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.SetPid);
+                this.proxy.CommandPipeWriter.Write(pid);
+                this.proxy.CommandPipeWriter.Flush();
+
+                this.readResponseAndThrow();
+            }
+            catch (Exception)
             {
                 this.Dispose();
                 throw;
@@ -232,7 +264,7 @@ namespace Cbonnell.DotNetExpect
             {
                 this.checkDisposedAndThrow();
 
-                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetChildPid);
+                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetPid);
                 this.proxy.CommandPipeWriter.Flush();
                 this.readResponseAndThrow();
 
@@ -249,7 +281,7 @@ namespace Cbonnell.DotNetExpect
             {
                 this.checkDisposedAndThrow();
 
-                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetChildExitCode);
+                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetProcessExitCode);
                 this.proxy.CommandPipeWriter.Flush();
                 this.readResponseAndThrow();
 
@@ -266,7 +298,7 @@ namespace Cbonnell.DotNetExpect
             {
                 this.checkDisposedAndThrow();
 
-                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetHasChildExited);
+                this.proxy.CommandPipeWriter.Write((byte)ProxyCommand.GetHasProcessExited);
                 this.proxy.CommandPipeWriter.Flush();
                 this.readResponseAndThrow();
 

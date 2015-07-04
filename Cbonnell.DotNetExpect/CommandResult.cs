@@ -48,5 +48,9 @@ namespace Cbonnell.DotNetExpect
         /// The child process has not yet been spawned for the current instance <see cref="ChildProcess"/>.
         /// </summary>
         ChildNotSpawned,
+        /// <summary>
+        /// A process with the specified PID does not exist.
+        /// </summary>
+        ProcessDoesNotExist,
     }
 }

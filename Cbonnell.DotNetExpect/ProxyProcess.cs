@@ -25,14 +25,15 @@ namespace Cbonnell.DotNetExpect
     internal enum ProxyCommand
     {
         StartProcess = 0,
+        SetPid,
         KillProcess,
         ClearConsole,
         ReadConsole,
         WriteConsole,
         AttachConsole,
-        GetChildPid,
-        GetChildExitCode,
-        GetHasChildExited,
+        GetPid,
+        GetProcessExitCode,
+        GetHasProcessExited,
     }
 
     internal class ProxyProcess
@@ -40,7 +41,8 @@ namespace Cbonnell.DotNetExpect
         private readonly NamedPipeClientStream commandPipe;
         private readonly BinaryReader commandReader;
         private readonly BinaryWriter commandWriter;
-        private Process childProcess = null;
+        private Process process = null;
+        private bool spawnedProcess = false;
 
         public ProxyProcess(string commandPipeName)
         {
@@ -65,24 +67,25 @@ namespace Cbonnell.DotNetExpect
                     switch ((ProxyCommand)opcode)
                     {
                         case ProxyCommand.StartProcess:
-                            if (this.childProcess == null)
+                            if (this.process == null)
                             {
-                                this.childProcess = new Process();
-                                this.childProcess.StartInfo.FileName = this.commandReader.ReadString();
-                                this.childProcess.StartInfo.Arguments = this.commandReader.ReadString();
-                                this.childProcess.StartInfo.WorkingDirectory = this.commandReader.ReadString();
-                                this.childProcess.StartInfo.UseShellExecute = false;
-                                this.childProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                this.process = new Process();
+                                this.process.StartInfo.FileName = this.commandReader.ReadString();
+                                this.process.StartInfo.Arguments = this.commandReader.ReadString();
+                                this.process.StartInfo.WorkingDirectory = this.commandReader.ReadString();
+                                this.process.StartInfo.UseShellExecute = false;
+                                this.process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                                 try
                                 {
-                                    this.childProcess.Start();
+                                    this.process.Start();
+                                    this.spawnedProcess = true;
                                     result = CommandResult.Success;
                                 }
                                 catch (Exception)
                                 {
                                     result = CommandResult.CouldNotSpawnChild;
-                                    this.childProcess.Dispose();
-                                    this.childProcess = null;
+                                    this.process.Dispose();
+                                    this.process = null;
                                 }
                             }
                             else
@@ -90,17 +93,32 @@ namespace Cbonnell.DotNetExpect
                                 result = CommandResult.ChildAlreadySpawned;
                             }
                             break;
-                        case ProxyCommand.KillProcess:
-                            if (this.childProcess != null)
+                        case ProxyCommand.SetPid:
+                            if (this.process == null)
                             {
-                                this.childProcess.Kill();
-                                this.childProcess.WaitForExit();
+                                try
+                                {
+                                    int pid = this.commandReader.ReadInt32();
+                                    this.process = Process.GetProcessById(pid);
+                                    result = CommandResult.Success;
+                                }
+                                catch (Exception)
+                                {
+                                    result = CommandResult.ProcessDoesNotExist;
+                                }
+                            }
+                            break;
+                        case ProxyCommand.KillProcess:
+                            if (this.process != null)
+                            {
+                                this.process.Kill();
+                                this.process.WaitForExit();
 
                                 this.commandWriter.Write((byte)CommandResult.Success);
-                                this.commandWriter.Write(this.childProcess.ExitCode);
+                                this.commandWriter.Write(this.process.ExitCode);
 
-                                this.childProcess.Dispose();
-                                this.childProcess = null;
+                                this.process.Dispose();
+                                this.process = null;
 
                                 shouldWriteResult = false;
                                 shouldContinue = false;
@@ -113,9 +131,9 @@ namespace Cbonnell.DotNetExpect
                         case ProxyCommand.AttachConsole:
                             int timeoutMs = this.commandReader.ReadInt32();
 
-                            if (this.childProcess != null)
+                            if (this.process != null)
                             {
-                                ConsoleInterface.AttachToConsole(this.childProcess.Id, TimeSpan.FromMilliseconds(timeoutMs));
+                                ConsoleInterface.AttachToConsole(this.process.Id, TimeSpan.FromMilliseconds(timeoutMs));
                                 result = CommandResult.Success;
                             }
                             else
@@ -138,11 +156,11 @@ namespace Cbonnell.DotNetExpect
                             ConsoleInterface.ClearConsole();
                             result = CommandResult.Success;
                             break;
-                        case ProxyCommand.GetHasChildExited:
-                            if (this.childProcess != null)
+                        case ProxyCommand.GetHasProcessExited:
+                            if (this.process != null)
                             {
                                 this.commandWriter.Write((byte)CommandResult.Success);
-                                this.commandWriter.Write(this.childProcess.HasExited);
+                                this.commandWriter.Write(this.process.HasExited);
                                 shouldWriteResult = false;
                             }
                             else
@@ -150,11 +168,11 @@ namespace Cbonnell.DotNetExpect
                                 result = CommandResult.ChildNotSpawned;
                             }
                             break;
-                        case ProxyCommand.GetChildPid:
-                            if (this.childProcess != null)
+                        case ProxyCommand.GetPid:
+                            if (this.process != null)
                             {
                                 this.commandWriter.Write((byte)CommandResult.Success);
-                                this.commandWriter.Write(this.childProcess.Id);
+                                this.commandWriter.Write(this.process.Id);
                                 shouldWriteResult = false;
                             }
                             else
@@ -162,13 +180,13 @@ namespace Cbonnell.DotNetExpect
                                 result = CommandResult.ChildNotSpawned;
                             }
                             break;
-                        case ProxyCommand.GetChildExitCode:
-                            if (this.childProcess != null)
+                        case ProxyCommand.GetProcessExitCode:
+                            if (this.process != null)
                             {
-                                if (this.childProcess.HasExited)
+                                if (this.process.HasExited)
                                 {
                                     this.commandWriter.Write((byte)CommandResult.Success);
-                                    this.commandWriter.Write(this.childProcess.ExitCode);
+                                    this.commandWriter.Write(this.process.ExitCode);
                                     shouldWriteResult = false;
                                 }
                                 else
@@ -193,11 +211,11 @@ namespace Cbonnell.DotNetExpect
                     this.commandWriter.Flush();
                 }
             }
-            finally // ensure that the child process is killed if we exit
+            finally // ensure that the child process is killed if we exit, but only if we spawned the process
             {
-                if (this.childProcess != null)
+                if (this.process != null && this.spawnedProcess)
                 {
-                    this.childProcess.Kill();
+                    this.process.Kill();
                 }
             }
         }

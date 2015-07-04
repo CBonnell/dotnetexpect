@@ -174,23 +174,67 @@ namespace Cbonnell.DotNetExpect.Test
         public void VerifyProxyDeadOnDispose()
         {
             Process[] powerShells = null;
-            Process proxyProcess = null;
 
             try
             {
                 using (ChildProcess childProc = new ChildProcess(TestEnvironment.CMD_EXE_NAME))
                 {
                     powerShells = Process.GetProcessesByName(TestEnvironment.PROXY_PROCESS_NAME);
-                    proxyProcess = Array.Find(powerShells, (p) => TestUtilities.IsProxyProcess(p));
-                    Assert.AreEqual(1, Array.FindAll(powerShells, (p) => TestUtilities.IsProxyProcess(p)).Length);
+                    Assert.AreEqual(1, powerShells.Length);
                 }
-                TestUtilities.WaitForProcessExitAndThrow(proxyProcess);
+                TestUtilities.WaitForProcessExitAndThrow(powerShells[0]);
             }
             finally
             {
                 if (powerShells != null)
                 {
                     Array.ForEach(powerShells, (p) => p.Dispose());
+                }
+            }
+        }
+
+        [Test]
+        public void TestExistingProcess()
+        {
+            using (Process p = new Process())
+            {
+                try
+                {
+                    p.StartInfo.FileName = TestEnvironment.CMD_EXE_NAME;
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.CreateNoWindow = true;
+                    p.Start();
+                    using (ChildProcess childProc = new ChildProcess(p.Id))
+                    {
+                        string prompt = childProc.Read(TestEnvironment.PROMPT_CHAR.ToString());
+                        Console.WriteLine(prompt);
+                    }
+                }
+                finally
+                {
+                    p.Kill();
+                }
+            }
+        }
+
+        [Test]
+        public void TestExistingProcessStillAliveAfterDispose()
+        {
+            using (Process p = new Process())
+            {
+                try
+                {
+                    p.StartInfo.FileName = TestEnvironment.CMD_EXE_NAME;
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.CreateNoWindow = true;
+                    p.Start();
+                    using (ChildProcess childProc = new ChildProcess(p.Id)) { }
+
+                    Assert.IsFalse(p.HasExited);
+                }
+                finally
+                {
+                    p.Kill();
                 }
             }
         }
